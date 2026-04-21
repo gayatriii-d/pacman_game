@@ -236,7 +236,7 @@ html, body {
 
 .side-panel {
   display: flex; flex-direction: column; gap: 16px;
-  width: 220px;
+  width: 280px;
   flex-shrink: 0;
 }
 
@@ -431,7 +431,7 @@ html, body {
     justify-content: flex-start;
     padding-top: 8px;
   }
-  .side-panel { width: 100%; max-width: 420px; flex-direction: row; flex-wrap: wrap; }
+  .side-panel { width: 100%; max-width: 600px; flex-direction: row; flex-wrap: wrap; }
   .panel-card { flex: 1; min-width: 140px; }
 }
 

@@ -30,7 +30,7 @@
 // ─────────────────────────────────────────────
 //  TICK RATE  (milliseconds per frame)
 // ─────────────────────────────────────────────
-static const int TICK_MS = 1000;
+static const int TICK_MS = 50;
 
 // ─────────────────────────────────────────────
 //  Title screen

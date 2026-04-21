@@ -65,7 +65,7 @@
     <div class="player-inputs">
       <div class="player-row">
         <label class="label-a">👾 Your Name</label>
-        <input id="nameA" type="text" placeholder="Enter your name..." maxlength="16" value="" />
+        <input id="nameA" type="text" placeholder="Enter your name..." maxlength="16" value="" onkeydown="if(event.key==='Enter') startGame()" />
       </div>
       <div style="background:#0a0a14;border-radius:10px;padding:12px;margin-top:4px;">
         <div style="font-size:11px;color:#666;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Your Opponent</div>

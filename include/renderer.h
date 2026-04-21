@@ -126,9 +126,7 @@ inline void renderGame(const GameState& gs) {
         << " ────────────────────────────\n" << CLR_RESET;
 
     buf << CLR_HEAD << "── CONTROLS ───────────────────────────────\n" << CLR_RESET;
-    buf << "  Player A (Team A): W A S D\n";
-    buf << "  Player B (Team B): Arrow keys (I J K L)\n";
-    buf << "  Q = Quit  |  P = Pause\n";
+    buf << "  Team A: W/A/S/D   Team B: Arrows/I/J/K/L   Q=Quit  P=Pause\n";
 
     std::cout << buf.str() << std::flush;
 }

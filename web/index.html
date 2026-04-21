@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pac-Man</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<!-- TITLE -->
+<div class="screen" id="title-screen">
+  <div class="logo">
+    <div class="logo-pac">PAC-MAN</div>
+    <div class="logo-sub">vs Ghosts</div>
+  </div>
+  <div class="ghost-row">
+    <canvas id="ghost-row-canvas" width="200" height="50"></canvas>
+  </div>
+  <div class="title-btns">
+    <button class="btn btn-primary" onclick="showScreen('lobby-screen')">▶ &nbsp; PLAY</button>
+    <button class="btn btn-secondary" onclick="showScreen('howto-screen')">📖 &nbsp; HOW TO PLAY</button>
+  </div>
+</div>
+
+<!-- HOW TO PLAY -->
+<div class="screen hidden" id="howto-screen">
+  <div class="lobby-card" style="max-width:520px;gap:18px;">
+    <h2>📖 HOW TO PLAY</h2>
+    <div class="controls-hint">
+      <table>
+        <tr><td colspan="2" style="color:#FFD700;font-weight:700;padding-bottom:6px;">Controls</td></tr>
+        <tr><td style="color:#00FF7F">Move</td><td>W A S D &nbsp;or&nbsp; Arrow Keys</td></tr>
+        <tr><td style="color:#aaa">Pause</td><td>P</td></tr>
+        <tr><td style="color:#aaa">Quit</td><td>Q</td></tr>
+      </table>
+    </div>
+    <div class="controls-hint">
+      <table>
+        <tr><td colspan="2" style="color:#FFD700;font-weight:700;padding-bottom:6px;">Scoring</td></tr>
+        <tr><td>Dot <span style="color:#ffff99">·</span></td><td>10 pts</td></tr>
+        <tr><td>Power Pellet <span style="color:#FFD700">●</span></td><td>50 pts + frighten ghosts</td></tr>
+        <tr><td>Eat Ghost <span style="color:#2121de">👻</span></td><td>200 pts</td></tr>
+      </table>
+    </div>
+    <div class="controls-hint">
+      <table>
+        <tr><td colspan="2" style="color:#FFD700;font-weight:700;padding-bottom:6px;">Ghost AI</td></tr>
+        <tr><td style="color:#FF0000">Blinky</td><td>A* — chases you directly</td></tr>
+        <tr><td style="color:#FFB8FF">Pinky</td><td>BFS — targets ahead of you</td></tr>
+        <tr><td style="color:#00FFFF">Inky</td><td>BFS — flanks you</td></tr>
+        <tr><td style="color:#FFB852">Clyde</td><td>BFS/Scatter — retreats when close</td></tr>
+      </table>
+    </div>
+    <button class="btn btn-primary" onclick="showScreen('title-screen')">← BACK</button>
+  </div>
+</div>
+
+<!-- LOBBY -->
+<div class="screen hidden" id="lobby-screen">
+  <div class="lobby-card">
+    <h2>🎮 WHO ARE YOU?</h2>
+    <div class="player-inputs">
+      <div class="player-row">
+        <label class="label-a">👾 Your Name</label>
+        <input id="nameA" type="text" placeholder="Enter your name..." maxlength="16" value="" />
+      </div>
+      <div style="background:#0a0a14;border-radius:10px;padding:12px;margin-top:4px;">
+        <div style="font-size:11px;color:#666;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Your Opponent</div>
+        <div style="color:#FF4444;font-size:18px;font-weight:700;">👻 The Haunted</div>
+        <div style="color:#666;font-size:11px;margin-top:4px;">4 ghosts powered by BFS · A* · DFS</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="startGame()">▶ &nbsp; START GAME</button>
+    <button class="btn" onclick="showScreen('title-screen')">← BACK</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div class="screen hidden" id="game-screen">
+
+  <div class="side-panel">
+    <div class="panel-card">
+      <h3>⏱ Tick</h3>
+      <div class="tick-display" id="tick-display">0</div>
+      <div class="tick-label">GAME TICK</div>
+    </div>
+
+    <div class="panel-card">
+      <h3>🏆 Score</h3>
+      <div class="score-row score-a">
+        <span class="score-name" id="name-a">You</span>
+        <span class="score-val"  id="score-a">0</span>
+      </div>
+      <div class="score-row score-b" style="margin-top:6px;">
+        <span class="score-name" style="color:#FF4444">The Haunted</span>
+        <span class="score-val"  id="score-haunted" style="color:#FF4444">0</span>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <h3>❤️ Lives</h3>
+      <div class="lives-row">
+        <span style="color:#00FF7F;font-size:13px" id="lives-name-a">Alpha</span>
+        <div class="lives-icons" id="lives-a"></div>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <h3>🍬 Dots</h3>
+      <div class="dots-bar-wrap">
+        <div class="dots-bar-label">
+          <span>Remaining</span>
+          <span id="dots-count">0</span>
+        </div>
+        <div class="dots-bar-bg">
+          <div class="dots-bar-fill" id="dots-bar" style="width:100%"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-danger" style="font-size:13px;padding:10px" onclick="quitGame()">✕ QUIT</button>
+  </div>
+
+  <canvas id="game-canvas"></canvas>
+
+  <div class="side-panel">
+    <div class="panel-card">
+      <h3>👻 Ghost AI</h3>
+      <div class="ghost-legend">
+        <div class="ghost-row-item">
+          <span class="ghost-icon" style="color:#FF0000">👻</span>
+          <div class="ghost-info">
+            <span class="ghost-name" style="color:#FF0000">Blinky</span>
+            <span class="ghost-algo">A* — Optimal Chase</span>
+          </div>
+        </div>
+        <div class="ghost-row-item">
+          <span class="ghost-icon" style="color:#FFB8FF">👻</span>
+          <div class="ghost-info">
+            <span class="ghost-name" style="color:#FFB8FF">Pinky</span>
+            <span class="ghost-algo">BFS — Ahead of You</span>
+          </div>
+        </div>
+        <div class="ghost-row-item">
+          <span class="ghost-icon" style="color:#00FFFF">👻</span>
+          <div class="ghost-info">
+            <span class="ghost-name" style="color:#00FFFF">Inky</span>
+            <span class="ghost-algo">BFS — Flanks You</span>
+          </div>
+        </div>
+        <div class="ghost-row-item">
+          <span class="ghost-icon" style="color:#FFB852">👻</span>
+          <div class="ghost-info">
+            <span class="ghost-name" style="color:#FFB852">Clyde</span>
+            <span class="ghost-algo">BFS/Scatter</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <h3>🎮 Controls</h3>
+      <div style="font-size:12px;line-height:2;color:#aaa">
+        <div><span style="color:#00FF7F;font-weight:700">Move:</span> W A S D</div>
+        <div><span style="color:#00FF7F;font-weight:700">Also:</span> Arrow Keys</div>
+        <div><span style="color:#FFD700;font-weight:700">Pause:</span> P</div>
+        <div><span style="color:#FF4444;font-weight:700">Quit:</span> Q</div>
+      </div>
+    </div>
+
+    <details class="ds-panel">
+      <summary>📚 Data Structures</summary>
+      <table class="ds-table">
+        <tr class="ds-clickable" onclick="showDSAnim(1)"><td>1</td><td>vector</td><td>Player list</td></tr>
+        <tr class="ds-clickable" onclick="showDSAnim(2)"><td>2</td><td>list</td><td>Ghost list</td></tr>
+        <tr class="ds-clickable" onclick="showDSAnim(3)"><td>3</td><td>map</td><td>Graph adjacency</td></tr>
+        <tr class="ds-clickable" onclick="showDSAnim(4)"><td>4</td><td>stack</td><td>Move history</td></tr>
+        <tr class="ds-clickable" onclick="showDSAnim(5)"><td>5</td><td>queue</td><td>BFS + power events</td></tr>
+        <tr class="ds-clickable" onclick="showDSAnim(6)"><td>6</td><td>prio_q</td><td>A* open set</td></tr>
+        <tr class="ds-clickable" onclick="showDSAnim(7)"><td>7</td><td>set</td><td>Dot positions</td></tr>
+        <tr class="ds-clickable" onclick="showDSAnim(8)"><td>8</td><td>umap</td><td>Fright timers</td></tr>
+        <tr class="ds-clickable" onclick="showDSAnim(9)"><td>9</td><td>matrix</td><td>Game grid (21×21)</td></tr>
+      </table>
+    </details>
+  </div>
+</div>
+
+<!-- PAUSE -->
+<div class="pause-overlay hidden" id="pause-overlay">
+  <div class="pause-title">⏸ PAUSED</div>
+  <div style="color:#aaa;font-size:16px">Press P to resume</div>
+  <button class="btn btn-primary" style="width:200px" onclick="togglePause()">▶ RESUME</button>
+</div>
+
+<!-- GAME OVER -->
+<div class="screen hidden" id="gameover-screen">
+  <div class="gameover-card">
+    <div class="gameover-title">GAME OVER</div>
+    <div class="winner-text" id="winner-text">—</div>
+    <div class="final-scores">
+      <div class="final-score-box team-a">
+        <div class="final-score-name" id="go-name-a">You</div>
+        <div class="final-score-val"  id="go-score-a">0</div>
+        <div style="font-size:10px;color:#666;margin-top:2px">YOUR SCORE</div>
+      </div>
+      <div class="final-score-box team-b">
+        <div class="final-score-name" style="color:#FF4444">The Haunted</div>
+        <div class="final-score-val"  id="go-score-haunted" style="color:#FF4444">0</div>
+        <div style="font-size:10px;color:#666;margin-top:2px">GHOSTS ATE YOU</div>
+      </div>
+    </div>
+    <div class="gameover-btns">
+      <button class="btn btn-primary" onclick="restartGame()">↺ PLAY AGAIN</button>
+      <button class="btn"             onclick="showScreen('title-screen')">⌂ MENU</button>
+    </div>
+  </div>
+</div>
+
+<!-- [TEMPORARY] DS ANIMATION MODAL -->
+<div id="ds-modal" class="ds-modal hidden">
+  <div class="ds-modal-box">
+    <div class="ds-modal-header">
+      <span id="ds-modal-title">vector</span>
+      <button onclick="closeDSAnim()" class="ds-modal-close">×</button>
+    </div>
+    <div id="ds-modal-desc" class="ds-modal-desc"></div>
+    <canvas id="ds-anim-canvas" width="340" height="180"></canvas>
+  </div>
+</div>
+
+<script src="game.js"></script>
+<script src="renderer.js"></script>
+<script src="main.js"></script>
+<script src="dsanim.js"></script>
+</body>
+</html>

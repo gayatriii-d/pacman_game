@@ -8,10 +8,11 @@
 
 // ── Constants ──
 const ROWS = 21, COLS = 21;
-const TICK_MS = 150;
+const TICK_MS = 100;
 const SCORE_DOT = 10, SCORE_POWER = 50, SCORE_GHOST = 200;
 const POWER_TICKS = 35;
 const SCATTER_TICKS = 28, CHASE_TICKS = 80, FRIGHTEN_TICKS = 40, EATEN_TICKS = 20;
+const GHOST_MOVE_EVERY = 3; // ghosts move 1 step every N ticks (higher = slower)
 
 // Tile types
 const EMPTY = 0, WALL = 1, DOT = 2, POWER = 3, WARP = 4;
@@ -388,11 +389,18 @@ function tickPowerEvents(gs) {
 function checkWinConditions(gs) {
   if (gs.dotsRemaining <= 0) {
     gs.gameOver = true; gs.running = false;
-    gs.winner = 0; // player cleared all dots
+    gs.winner = 0; // player cleared all dots — player wins
     return;
   }
   const aAlive = gs.players.some(p => p.alive && p.team === TEAM_A);
-  if (!aAlive) { gs.gameOver = true; gs.running = false; gs.winner = 1; } // ghosts win
+  if (!aAlive) {
+    gs.gameOver = true; gs.running = false;
+    const playerScore  = gs.players[0].score;
+    const hauntedScore = (3 - gs.players[0].lives) * 200;
+    if (playerScore > hauntedScore)      gs.winner = 0; // player wins by score
+    else if (hauntedScore > playerScore) gs.winner = 1; // haunted wins
+    else                                 gs.winner = 2; // draw
+  }
 }
 
 function updateLeaderboard(gs) {
@@ -404,7 +412,8 @@ function gameTick(gs) {
   if (!gs.running) return;
   gs.tick++;
   tickPowerEvents(gs);
-  for (const g of gs.ghosts) updateGhost(gs, g);
+  if (gs.tick % GHOST_MOVE_EVERY === 0)
+    for (const g of gs.ghosts) updateGhost(gs, g);
   checkGhostCollisions(gs);
   checkWinConditions(gs);
   updateLeaderboard(gs);

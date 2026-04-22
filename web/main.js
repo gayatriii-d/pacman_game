@@ -186,20 +186,21 @@ function showGameOver() {
   if (gameLoopId) { clearTimeout(gameLoopId); gameLoopId = null; }
 
   const pA = gs.players[0];
-  const livesLost = (3 - pA.lives) * 200;
+  const livesLost = (3 - Math.max(0, pA.lives)) * 200;
+  const hauntedScore = pA.alive ? 0 : livesLost;
   document.getElementById('go-name-a').textContent  = pA.name;
   document.getElementById('go-score-a').textContent = pA.score;
-  document.getElementById('go-score-haunted').textContent = livesLost;
+  document.getElementById('go-score-haunted').textContent = hauntedScore;
 
   const wt = document.getElementById('winner-text');
   if (gs.winner === 0) {
-    wt.textContent = `🏆 ${pA.name} Wins!`;
+    wt.textContent = `🏆 ${pA.name} Wins!  (${pA.score} pts)`;
     wt.className = 'winner-text winner-a';
   } else if (gs.winner === 1) {
-    wt.textContent = '👻 The Haunted Wins!';
+    wt.textContent = `👻 The Haunted Wins!  (${hauntedScore} pts)`;
     wt.className = 'winner-text winner-b';
   } else {
-    wt.textContent = "🤝 It's a Draw!";
+    wt.textContent = `🤝 Draw!  (${pA.score} vs ${hauntedScore})`;
     wt.className = 'winner-text winner-draw';
   }
 
